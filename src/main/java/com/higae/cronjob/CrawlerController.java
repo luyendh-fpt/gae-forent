@@ -12,6 +12,7 @@ import com.google.pubsub.v1.PubsubMessage;
 import com.googlecode.objectify.ObjectifyService;
 import com.higae.config.HiGAEConstant;
 import com.higae.entity.Article;
+import com.higae.entity.CrawlerSource;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -37,25 +38,32 @@ public class CrawlerController extends HttpServlet {
 
     static {
         ObjectifyService.register(Article.class);
+        ObjectifyService.register(CrawlerSource.class);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LOGGER.severe("Crawler job. Started at: " + Calendar.getInstance().getTime());
         try {
-            Document document = Jsoup.connect("https://linkhay.com/link/stream/hot").get();
-            Elements els = document.select(".main-col .V2-link-list a");
-            HashSet<String> uniqueLinks = new HashSet<>();
-            for (Element el :
-                    els) {
-                uniqueLinks.add(el.attr("href"));
+            List<CrawlerSource> listSouce = ofy().load().type(CrawlerSource.class).list();
+            for (CrawlerSource source :
+                    listSouce) {
+                Document document = Jsoup.connect(source.getUrl()).get();
+                Elements els = document.select(source.getLinkSelector());
+                HashSet<String> uniqueLinks = new HashSet<>();
+                for (Element el :
+                        els) {
+                    uniqueLinks.add(el.attr("href"));
+                }
+                for (String link :
+                        uniqueLinks) {
+                    Article article = new Article(link, Article.Status.PENDING);
+                    article.setSource(source.getUrl());
+                    ofy().save().entity(article).now();
+                    publicLink(link);
+                }
             }
-            for (String link :
-                    uniqueLinks) {
-                Article article = new Article(link, Article.Status.PENDING);
-                ofy().save().entity(article).now();
-                publicLink(link);
-            }
+
         } catch (Exception ex) {
             LOGGER.severe(ex.getMessage());
             ex.printStackTrace();

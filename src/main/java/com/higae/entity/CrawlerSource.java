@@ -9,7 +9,9 @@ import com.googlecode.objectify.annotation.Unindex;
 public class CrawlerSource {
 
     @Id
-    private String url;
+    private String url; // https://vnexpress.net/kinh-doanh
+    @Unindex
+    private String linkSelector; //  .list_news a
     @Unindex
     private String titleSelector;
     @Unindex
@@ -39,6 +41,14 @@ public class CrawlerSource {
     public CrawlerSource(String url, int status) {
         this.url = url;
         this.status = status;
+    }
+
+    public String getLinkSelector() {
+        return linkSelector;
+    }
+
+    public void setLinkSelector(String linkSelector) {
+        this.linkSelector = linkSelector;
     }
 
     public String getUrl() {

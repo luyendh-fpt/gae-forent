@@ -16,7 +16,7 @@ public class HelloController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ObjectifyService.register(Article.class);
         Article article = new Article();
-        article.setId(Calendar.getInstance().getTimeInMillis());
+        article.setLink("somelink");
         article.setTitle("Bao moi");
         article.setContent("Bao moi hom nay.");
         ofy().save().entity(article).now();
