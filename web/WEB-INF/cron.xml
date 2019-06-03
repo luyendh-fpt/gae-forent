@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+    <cron>
+        <url>/_cron/crawler</url>
+        <target>beta</target>
+        <description>1 min job</description>
+        <schedule>every 1 minutes</schedule>
+    </cron>
+</cronentries>
