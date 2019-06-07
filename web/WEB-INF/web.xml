@@ -4,6 +4,22 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
     <servlet>
+        <servlet-name>PullQueueController</servlet-name>
+        <servlet-class>com.higae.controller.PullQueueController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PullQueueController</servlet-name>
+        <url-pattern>/admin/pull-queue</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>CreateQueueController</servlet-name>
+        <servlet-class>com.higae.controller.CreateQueueController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreateQueueController</servlet-name>
+        <url-pattern>/admin/create-queue</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>CrawlerSourceController</servlet-name>
         <servlet-class>com.higae.controller.CrawlerSourceController</servlet-class>
     </servlet>

@@ -4,6 +4,12 @@
         <url>/_cron/crawler</url>
         <target>beta</target>
         <description>1 min job</description>
-        <schedule>every 1 minutes</schedule>
+        <schedule>every 30 minutes</schedule>
+    </cron>
+    <cron>
+        <url>/admin/pull-queue</url>
+        <target>beta</target>
+        <description>1 min job</description>
+        <schedule>every 30 minutes</schedule>
     </cron>
 </cronentries>

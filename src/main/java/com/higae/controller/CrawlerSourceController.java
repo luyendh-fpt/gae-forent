@@ -32,11 +32,13 @@ public class CrawlerSourceController extends HttpServlet {
         String titleSelector = req.getParameter("titleSelector");
         String contentSelector = req.getParameter("contentSelector");
         String authorSelector = req.getParameter("authorSelector");
+        String linkSelector = req.getParameter("linkSelector");
         // validate
         CrawlerSource crawlerSource = new CrawlerSource(url, CrawlerSource.Status.ACTIVE.getValue());
         crawlerSource.setTitleSelector(titleSelector);
         crawlerSource.setContentSelector(contentSelector);
         crawlerSource.setAuthorSelector(authorSelector);
+        crawlerSource.setLinkSelector(linkSelector);
         LOGGER.info(new Gson().toJson(crawlerSource));
         ofy().save().entity(crawlerSource).now();
         resp.getWriter().print("Okie");

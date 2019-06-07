@@ -4,6 +4,9 @@ import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutures;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
@@ -35,6 +38,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 public class CrawlerController extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(CrawlerController.class.getName());
+    private static Queue q = QueueFactory.getQueue("my-queue-queue");
 
     static {
         ObjectifyService.register(Article.class);
@@ -43,7 +47,7 @@ public class CrawlerController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        LOGGER.severe("Crawler job. Started at: " + Calendar.getInstance().getTime());
+        LOGGER.info("Crawler job. Started at: " + Calendar.getInstance().getTime());
         try {
             List<CrawlerSource> listSouce = ofy().load().type(CrawlerSource.class).list();
             for (CrawlerSource source :
@@ -58,9 +62,13 @@ public class CrawlerController extends HttpServlet {
                 for (String link :
                         uniqueLinks) {
                     Article article = new Article(link, Article.Status.PENDING);
-                    article.setSource(source.getUrl());
-                    ofy().save().entity(article).now();
-                    publicLink(link);
+                    Article existArticle = ofy().load().type(Article.class).id(link).now();
+                    if (existArticle == null) {
+                        article.setSource(source.getUrl());
+                        ofy().save().entity(article).now();
+//                    publicLink(link);
+                        addToQueue(article.getLink());
+                    }
                 }
             }
 
@@ -68,6 +76,10 @@ public class CrawlerController extends HttpServlet {
             LOGGER.severe(ex.getMessage());
             ex.printStackTrace();
         }
+    }
+
+    public static void addToQueue(String articleId) {
+        q.add(TaskOptions.Builder.withMethod(TaskOptions.Method.PULL).payload(articleId));
     }
 
     public static void publicLink(String link) {
@@ -107,6 +119,25 @@ public class CrawlerController extends HttpServlet {
             }
         } catch (Exception ex) {
             LOGGER.severe(ex.getMessage());
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        Document document = Jsoup.connect("https://vnexpress.net/").get();
+        Elements els = document.select(".list_news .title_news a");
+        HashSet<String> uniqueLinks = new HashSet<>();
+        for (Element el :
+                els) {
+            uniqueLinks.add(el.attr("href"));
+        }
+        for (String link :
+                uniqueLinks) {
+            Article article = new Article(link, Article.Status.PENDING);
+//            article.setSource(source.getUrl());
+//            ofy().save().entity(article).now();
+//                    publicLink(link);
+//            addToQueue(article.getLink());
+            System.out.println(article.getLink());
         }
     }
 }
